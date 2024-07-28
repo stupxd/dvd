@@ -1,0 +1,39 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 1
+
+# dvd
+[[patches]]
+[patches.pattern]
+target = "game.lua"
+pattern = "if (not G.recording_mode or G.video_control )and true then"
+position = "at"
+payload = '''
+if G.SHADERS['dvd_dvd'] and display_dvd() then
+    --love.graphics.setColor(HEX(SMODS.Mods.DVD.config.color))
+
+    G.ARGS.eased_cursor_pos = G.ARGS.eased_cursor_pos or {x=G.CURSOR.T.x,y=G.CURSOR.T.y, sx = G.CONTROLLER.cursor_position.x, sy = G.CONTROLLER.cursor_position.y}
+    G.screenwipe_amt = G.screenwipe_amt and (0.95*G.screenwipe_amt + 0.05*((self.screenwipe and 0.4 or self.screenglitch and 0.4) or 0)) or 1
+    G.SETTINGS.GRAPHICS.crt = G.SETTINGS.GRAPHICS.crt*0.3
+    G.SHADERS['dvd_dvd']:send('distortion_fac', {1.0 + 0.07*G.SETTINGS.GRAPHICS.crt/100, 1.0 + 0.1*G.SETTINGS.GRAPHICS.crt/100})
+    G.SHADERS['dvd_dvd']:send('scale_fac', {1.0 - 0.008*G.SETTINGS.GRAPHICS.crt/100, 1.0 - 0.008*G.SETTINGS.GRAPHICS.crt/100})
+    G.SHADERS['dvd_dvd']:send('feather_fac', 0.01)
+    G.SHADERS['dvd_dvd']:send('bloom_fac', G.SETTINGS.GRAPHICS.bloom - 1)
+    G.SHADERS['dvd_dvd']:send('time',400 + G.TIMERS.REAL)
+    G.SHADERS['dvd_dvd']:send('noise_fac',0.001*G.SETTINGS.GRAPHICS.crt/100)
+    G.SHADERS['dvd_dvd']:send('crt_intensity', 0.16*G.SETTINGS.GRAPHICS.crt/100)
+    G.SHADERS['dvd_dvd']:send('glitch_intensity', 0)--0.1*G.SETTINGS.GRAPHICS.crt/100 + (G.screenwipe_amt) + 1)
+    G.SHADERS['dvd_dvd']:send('scanlines', G.CANVAS:getPixelHeight()*0.75/G.CANV_SCALE)
+    G.SHADERS['dvd_dvd']:send('mouse_screen_pos', G.video_control and {love.graphics.getWidth( )/2, love.graphics.getHeight( )/2} or {G.ARGS.eased_cursor_pos.sx, G.ARGS.eased_cursor_pos.sy})
+    G.SHADERS['dvd_dvd']:send('screen_scale', G.TILESCALE*G.TILESIZE)
+    G.SHADERS['dvd_dvd']:send('hovering', 1)
+
+	G.SHADERS['dvd_dvd']:send('time',10 + G.TIMERS.REAL)
+	G.SHADERS['dvd_dvd']:send('image_details', {love.graphics.getWidth(), love.graphics.getHeight()})
+    
+	love.graphics.setShader( G.SHADERS['dvd_dvd'])
+
+    G.SETTINGS.GRAPHICS.crt = G.SETTINGS.GRAPHICS.crt/0.3
+elseif (not G.recording_mode or G.video_control )and true then'''
+match_indent = true
