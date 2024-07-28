@@ -59,6 +59,12 @@ SMODS.current_mod.config_tab = function()
     }}
 end
 
+SMODS.Atlas{
+    key = "modicon",
+    path = "modicon.png",
+    px = 32,
+    py = 32
+}
 
 SMODS.Shader {
     key = 'dvd',
